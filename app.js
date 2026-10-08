@@ -3,8 +3,6 @@ const GOAL_KEY = 'deepwork.goal.v1';
 const THEME_KEY = 'deepwork.theme.v1';
 const RANGE_KEY = 'deepwork.range.v1';
 const SESSION_KEY = 'deepwork.session.v1';
-const MUSIC_KEY = 'deepwork.music.v1';
-const DEFAULT_MUSIC = 'https://open.spotify.com/artist/557O0QveNw9BAeUsDfVHo4';
 
 const WD = ['sun','mon','tue','wed','thu','fri','sat'];
 const WDS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -592,49 +590,6 @@ $('resetBtn').addEventListener('click', () => {
   renderAll();
 });
 
-function spotifyEmbed(url){
-  const m = url.match(/(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?|spotify:)(playlist|album|artist|track|episode|show)[\/:]([A-Za-z0-9]+)/);
-  if (!m) return null;
-  const compact = m[1] === 'track' || m[1] === 'episode';
-  return { src: `https://open.spotify.com/embed/${m[1]}/${m[2]}`, height: compact ? 80 : 152 };
-}
-
-function youtubeEmbed(url){
-  const list = url.match(/[?&]list=([A-Za-z0-9_-]+)/);
-  if (list) return { src: `https://www.youtube.com/embed/videoseries?list=${list[1]}`, height: 152 };
-  const vid = url.match(/(?:youtu\.be\/|[?&]v=)([A-Za-z0-9_-]{6,})/);
-  if (vid) return { src: `https://www.youtube.com/embed/${vid[1]}`, height: 152 };
-  return null;
-}
-
-function musicEmbed(url){
-  return spotifyEmbed(url) || youtubeEmbed(url);
-}
-
-function renderMusic(){
-  const url = localStorage.getItem(MUSIC_KEY) || DEFAULT_MUSIC;
-  const emb = musicEmbed(url);
-  const box = $('musicFrame');
-  if (!emb){ box.innerHTML = ''; return; }
-  box.innerHTML = `<iframe src="${emb.src}" width="100%" height="${emb.height}" frameborder="0" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" title="focus music"></iframe>`;
-}
-
-$('musicEdit').addEventListener('click', () => {
-  const current = localStorage.getItem(MUSIC_KEY) || '';
-  const url = prompt('Paste your Spotify or YouTube playlist link:', current);
-  if (url === null) return;
-  if (url.trim() === ''){
-    localStorage.removeItem(MUSIC_KEY);
-  } else if (musicEmbed(url.trim())){
-    localStorage.setItem(MUSIC_KEY, url.trim());
-  } else {
-    alert('Link not recognized. Use a Spotify (playlist, album, artist, track) or YouTube playlist URL.');
-    return;
-  }
-  renderMusic();
-});
-
 renderAll();
-renderMusic();
 setInterval(tick, 1000);
 tick();
