@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>grind session</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='4' fill='%2339d353'/></svg>">
+<script>
+document.documentElement.dataset.theme = localStorage.getItem('deepwork.theme.v1') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="topbar-right">
+      <span class="topbar-brand">grind<span class="brand-sub"> session</span></span>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="cambiar tema">
+        <svg class="icon-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="3.25"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.5 3.5l1 1M11.5 11.5l1 1M12.5 3.5l-1 1M4.5 11.5l-1 1" stroke-linecap="round"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A5.75 5.75 0 0 1 6.5 2.5a5.75 5.75 0 1 0 7 7Z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card hero">
+    <div class="clock-block">
+      <div class="clock-label">hora local</div>
+      <div class="clock"><span id="hh">--</span><span class="colon">:</span><span id="mm">--</span><span class="colon">:</span><span id="ss">--</span></div>
+      <div class="clock-date" id="heroDate">&mdash;</div>
+    </div>
+
+    <div class="cup-stage">
+      <svg class="cup" id="cup" viewBox="0 0 120 120" role="img" aria-label="progreso de la sesión">
+        <defs>
+          <radialGradient id="cupGlow">
+            <stop offset="0%" style="stop-color:var(--bar-fill);stop-opacity:.3"/>
+            <stop offset="100%" style="stop-color:var(--bar-fill);stop-opacity:0"/>
+          </radialGradient>
+          <linearGradient id="liqGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" style="stop-color:#7ee787"/>
+            <stop offset="45%" style="stop-color:#39d353"/>
+            <stop offset="100%" style="stop-color:#0e4429"/>
+          </linearGradient>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" style="stop-color:#7ee787"/>
+            <stop offset="100%" style="stop-color:#26a641"/>
+          </linearGradient>
+          <clipPath id="cupClip">
+            <path d="M28 40 a32 7 0 0 1 64 0 v34 a16 16 0 0 1 -16 16 h-32 a16 16 0 0 1 -16 -16 Z"/>
+          </clipPath>
+        </defs>
+
+        <circle class="cup-glow" id="cupGlow" cx="60" cy="62" r="52" fill="url(#cupGlow)"/>
+        <circle class="ring-track" cx="60" cy="60" r="54"/>
+        <circle class="ring-progress" id="cupRing" cx="60" cy="60" r="54"/>
+        <g class="ring-knob" id="ringKnob" style="opacity:0">
+          <circle cx="60" cy="6" r="3.2"/>
+        </g>
+
+        <g class="cup-float">
+          <ellipse class="cup-shadow" cx="60" cy="101" rx="30" ry="5.5"/>
+          <ellipse class="saucer" cx="60" cy="97" rx="38" ry="8"/>
+          <path class="cup-handle" d="M92 46 a13 13 0 0 1 0 22"/>
+
+          <g clip-path="url(#cupClip)">
+            <g class="liquid-group" id="liquidGroup">
+              <path class="cup-wave-back" d="M-20 42 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 V120 H-20 Z"/>
+              <path class="cup-wave" d="M-20 44.5 q10 -3.5 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 V120 H-20 Z"/>
+            </g>
+            <g class="cup-bubbles">
+              <circle cx="46" cy="88" r="2.2"/>
+              <circle cx="58" cy="90" r="1.6"/>
+              <circle cx="68" cy="87" r="2.6"/>
+              <circle cx="78" cy="90" r="1.5"/>
+            </g>
+          </g>
+
+          <path class="cup-body" d="M28 40 a32 7 0 0 1 64 0 v34 a16 16 0 0 1 -16 16 h-32 a16 16 0 0 1 -16 -16 Z"/>
+          <path class="cup-rim-back" d="M28 40 a32 7 0 0 0 64 0"/>
+          <path class="cup-shine" d="M39 49 q-4 17 3 31"/>
+          <circle class="cup-spec" cx="86" cy="36.5" r="1.8"/>
+
+          <g class="cup-steam">
+            <path d="M50 28 c-4 -5 4 -8 0 -14"/>
+            <path d="M60 28 c-4 -5 4 -8 0 -14"/>
+            <path d="M70 28 c-4 -5 4 -8 0 -14"/>
+          </g>
+
+          <g class="cup-sparks" aria-hidden="true">
+            <path d="M22 34 h6 M25 31 v6"/>
+            <path d="M96 26 h5 M98.5 23.5 v5"/>
+            <path d="M100 72 h5 M102.5 69.5 v5"/>
+          </g>
+        </g>
+      </svg>
+      <div class="cup-caption">
+        <span class="cup-pct" id="cupPct">0%</span>
+        <span class="cup-sub" id="cupSub">hoy &middot; 0h / 3h</span>
+      </div>
+    </div>
+
+    <div class="session">
+      <div class="session-status"><span class="status-dot" id="statusDot"></span><span id="sessionStatus">sesión de hoy</span></div>
+      <div class="session-timer" id="sessionTimer">0h</div>
+      <div class="session-sub" id="sessionSub">registradas hoy</div>
+      <div class="session-controls" id="sessionControls"></div>
+      <div class="goal-row">
+        <span class="muted">objetivo</span>
+        <span class="goal-value" id="goalLabel">3h</span>
+        <span class="goal-btns">
+          <button class="btn btn-sm" id="goalMinus" type="button">&#8722;0.5h</button>
+          <button class="btn btn-sm" id="goalPlus" type="button">+0.5h</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="grid">
+    <section class="card leader">
+      <div class="card-head">
+        <h2>Leaderboard &middot; esta semana</h2>
+        <span class="muted" id="leaderRange"></span>
+      </div>
+      <ol class="leader-list" id="leaderList"></ol>
+    </section>
+
+    <div class="col">
+      <section class="card contrib">
+        <div class="card-head">
+          <h2 id="contribTitle">&mdash;</h2>
+          <div class="range-switch" id="rangeSwitch">
+            <button type="button" data-weeks="13">3M</button>
+            <button type="button" data-weeks="26">6M</button>
+            <button type="button" data-weeks="52">1A</button>
+          </div>
+        </div>
+        <div class="graph-scroll" id="graphScroll"><div class="graph" id="graph"></div></div>
+        <div class="graph-foot">
+          <span class="muted">clic en un d&iacute;a para registrar horas</span>
+          <div class="legend">
+            <span>menos</span>
+            <i class="csq lv0"></i><i class="csq lv1"></i><i class="csq lv2"></i><i class="csq lv3"></i><i class="csq lv4"></i>
+            <span>m&aacute;s</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card activity">
+        <div class="card-head">
+          <h2>Actividad reciente</h2>
+          <span class="muted" id="activityCount"></span>
+        </div>
+        <div class="timeline" id="log"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span class="muted">tus registros se guardan en el navegador (localStorage)</span>
+    <button class="btn btn-danger" id="resetBtn" type="button">borrar datos</button>
+  </footer>
+</main>
+
+<div class="tooltip" id="tooltip" hidden></div>
+<div class="pop" id="pop" hidden>
+  <div class="pop-date" id="popDate">&mdash;</div>
+  <div class="pop-hours" id="popHours">0h</div>
+  <div class="pop-controls">
+    <button class="btn" type="button" data-d="-1">&#8722;1h</button>
+    <button class="btn" type="button" data-d="1">+1h</button>
+    <button class="btn" type="button" data-d="-0.5">&#8722;0.5h</button>
+    <button class="btn" type="button" data-d="0.5">+0.5h</button>
+  </div>
+  <button class="btn btn-block" type="button" id="popReset">poner a cero</button>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
