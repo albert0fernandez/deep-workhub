@@ -3,15 +3,17 @@ const GOAL_KEY = 'deepwork.goal.v1';
 const THEME_KEY = 'deepwork.theme.v1';
 const RANGE_KEY = 'deepwork.range.v1';
 const SESSION_KEY = 'deepwork.session.v1';
+const MUSIC_KEY = 'deepwork.music.v1';
+const DEFAULT_MUSIC = 'https://open.spotify.com/artist/557O0QveNw9BAeUsDfVHo4';
 
-const WD = ['dom','lun','mar','mié','jue','vie','sáb'];
-const WDS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-const WD_LONG = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-const MONTHS_LONG = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const RANGES = {13:'los últimos 3 meses', 26:'los últimos 6 meses', 52:'el último año'};
+const WD = ['sun','mon','tue','wed','thu','fri','sat'];
+const WDS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WD_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const RANGES = {13:'in the last 3 months', 26:'in the last 6 months', 52:'this year'};
 const RING_C = 339.292;
-const STATUS_TEXT = { idle:'sesión de hoy', running:'sesión en curso', paused:'sesión en pausa', completed:'sesión completada' };
+const STATUS_TEXT = { idle:'ready', running:'locked in', paused:'paused', completed:'completed' };
 
 const ICONS = {
   calendar: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2.25" y="3.25" width="11.5" height="10.5" rx="2"/><path d="M2.25 6.75h11.5M5.75 1.75v3M10.25 1.75v3"/></svg>',
@@ -72,8 +74,8 @@ function hash7(s){
   return (h >>> 0).toString(16).padStart(8,'0').slice(0,7);
 }
 
-function shortDate(d){ return `${WD[d.getDay()]} ${p2(d.getDate())} ${MONTHS[d.getMonth()]}`; }
-function longDate(d){ return `${WD_LONG[d.getDay()]}, ${d.getDate()} de ${MONTHS_LONG[d.getMonth()]}`; }
+function shortDate(d){ return `${WDS[d.getDay()]} ${MONTHS[d.getMonth()]} ${d.getDate()}`; }
+function longDate(d){ return `${WD_LONG[d.getDay()]}, ${MONTHS_LONG[d.getMonth()]} ${d.getDate()}`; }
 
 let data = load();
 let editing = null;
@@ -169,7 +171,7 @@ tick.day = null;
 
 function renderHero(){
   const n = new Date();
-  $('heroDate').textContent = `${longDate(n)} de ${n.getFullYear()}`;
+  $('heroDate').textContent = `${longDate(n)}, ${n.getFullYear()}`;
 }
 
 function renderCupSession(){
@@ -196,16 +198,16 @@ function renderCupSession(){
 
   if (s){
     $('sessionTimer').textContent = fmtClock(elapsed);
-    if (st === 'completed') $('sessionSub').textContent = `añadida a hoy · ${fmtH(s.targetSec/3600)}`;
-    else if (st === 'paused') $('sessionSub').textContent = `de ${fmtClock(s.targetSec)} · en pausa`;
-    else $('sessionSub').textContent = `de ${fmtClock(s.targetSec)} · restan ${fmtClock(Math.max(0, s.targetSec - elapsed))}`;
+    if (st === 'completed') $('sessionSub').textContent = `added to today · ${fmtH(s.targetSec/3600)}`;
+    else if (st === 'paused') $('sessionSub').textContent = `of ${fmtClock(s.targetSec)} · paused`;
+    else $('sessionSub').textContent = `of ${fmtClock(s.targetSec)} · ${fmtClock(Math.max(0, s.targetSec - elapsed))} left`;
     $('cupSub').textContent = st === 'completed'
-      ? 'sesión completada'
-      : `restan ${fmtClock(Math.max(0, s.targetSec - elapsed))}`;
+      ? 'session complete'
+      : `${fmtClock(Math.max(0, s.targetSec - elapsed))} left`;
   } else {
     $('sessionTimer').textContent = fmtH(todayH);
-    $('sessionSub').textContent = `registradas hoy · objetivo ${fmtH(goal)}`;
-    $('cupSub').textContent = `hoy · ${fmtH(todayH)} / ${fmtH(goal)}`;
+    $('sessionSub').textContent = `${fmtH(todayH)} logged today · goal ${fmtH(goal)}`;
+    $('cupSub').textContent = `today · ${fmtH(todayH)} / ${fmtH(goal)}`;
   }
 
   $('goalLabel').textContent = fmtH(goal);
@@ -218,17 +220,17 @@ function renderCupSession(){
 function renderSessionControls(st){
   const el = $('sessionControls');
   if (st === 'idle'){
-    el.innerHTML = '<button class="btn btn-primary btn-block" id="startBtn" type="button">Empezar sesión</button>';
+    el.innerHTML = '<button class="btn btn-primary btn-block" id="startBtn" type="button">Start session</button>';
   } else if (st === 'running'){
-    el.innerHTML = '<button class="btn btn-block" id="pauseBtn" type="button">Pausar</button>'
-      + '<button class="btn btn-primary btn-block" id="finishBtn" type="button">Terminar y guardar</button>'
-      + '<button class="btn btn-invisible btn-block" id="discardBtn" type="button">descartar</button>';
+    el.innerHTML = '<button class="btn btn-block" id="pauseBtn" type="button">Pause</button>'
+      + '<button class="btn btn-primary btn-block" id="finishBtn" type="button">Finish &amp; save</button>'
+      + '<button class="btn btn-invisible btn-block" id="discardBtn" type="button">discard</button>';
   } else if (st === 'paused'){
-    el.innerHTML = '<button class="btn btn-primary btn-block" id="resumeBtn" type="button">Reanudar</button>'
-      + '<button class="btn btn-block" id="finishBtn" type="button">Terminar y guardar</button>'
-      + '<button class="btn btn-invisible btn-block" id="discardBtn" type="button">descartar</button>';
+    el.innerHTML = '<button class="btn btn-primary btn-block" id="resumeBtn" type="button">Resume</button>'
+      + '<button class="btn btn-block" id="finishBtn" type="button">Finish &amp; save</button>'
+      + '<button class="btn btn-invisible btn-block" id="discardBtn" type="button">discard</button>';
   } else {
-    el.innerHTML = '<button class="btn btn-block" id="newSessionBtn" type="button">Empezar otra</button>';
+    el.innerHTML = '<button class="btn btn-block" id="newSessionBtn" type="button">Start another</button>';
   }
 }
 
@@ -276,10 +278,10 @@ function renderStats(){
   const best = days.reduce((a,d) => d.hours > a.hours ? d : a, days[0]);
   const registered = Object.values(data).filter(h => h > 0).length;
   const items = [
-    { icon:'calendar', label:'Esta semana', value: fmtH(total), sub: 'de 7 días' },
-    { icon:'flame', label:'Racha', value: streak() + 'd', sub: 'días seguidos' },
-    { icon:'trophy', label:'Mejor día', value: best.hours ? fmtH(best.hours) : '—', sub: best.hours ? shortDate(best.date) : 'sin datos' },
-    { icon:'check', label:'Registros', value: registered + 'd', sub: 'días con deepwork' }
+    { icon:'calendar', label:'This week', value: fmtH(total), sub: 'of 7 days' },
+    { icon:'flame', label:'Streak', value: streak() + 'd', sub: 'days in a row' },
+    { icon:'trophy', label:'Best day', value: best.hours ? fmtH(best.hours) : '—', sub: best.hours ? shortDate(best.date) : 'no data' },
+    { icon:'check', label:'Logged days', value: registered + 'd', sub: 'days with deep work' }
   ];
   $('stats').innerHTML = items.map(i => `
     <div class="stat card">
@@ -294,7 +296,7 @@ function renderLeader(){
   const sorted = [...days].sort((a,b) => b.hours - a.hours);
   const max = Math.max(...days.map(d => d.hours), 1);
   const todayKey = ymd(new Date());
-  $('leaderRange').textContent = `${days[0].date.getDate()} — ${days[6].date.getDate()} ${MONTHS[days[6].date.getMonth()]}`;
+  $('leaderRange').textContent = `${WDS[days[0].date.getDay()]} ${days[0].date.getDate()} — ${WDS[days[6].date.getDay()]} ${days[6].date.getDate()} ${MONTHS[days[6].date.getMonth()]}`;
   $('leaderList').innerHTML = sorted.map((d, i) => {
     const pct = d.hours ? Math.max(6, Math.round(d.hours/max*100)) : 0;
     const cls = [
@@ -326,14 +328,14 @@ function renderContribTitle(){
     .length;
   const label = RANGES[rangeWeeks] || RANGES[26];
   $('contribTitle').textContent = count === 1
-    ? `1 contribución en ${label}`
-    : `${count} contribuciones en ${label}`;
+    ? `1 contribution ${label}`
+    : `${count} contributions ${label}`;
 }
 
 function renderGraph(){
   graph.innerHTML = '';
   const { start, today } = rangeWindow();
-  const dayRows = ['Lun','','Mié','','Vie','',''];
+  const dayRows = ['Mon','','Wed','','Fri','',''];
 
   dayRows.forEach((name, d) => {
     if (!name) return;
@@ -368,7 +370,7 @@ function renderGraph(){
       btn.style.gridColumn = w + 2;
       btn.style.gridRow = d + 2;
       btn.dataset.date = key;
-      btn.dataset.tip = h > 0 ? `${fmtH(h)} de deepwork · ${longDate(date)}` : `sin registro · ${longDate(date)}`;
+      btn.dataset.tip = h > 0 ? `${fmtH(h)} of deep work · ${longDate(date)}` : `no record · ${longDate(date)}`;
       btn.setAttribute('aria-label', btn.dataset.tip);
       if (date > today){
         btn.classList.add('future');
@@ -385,17 +387,17 @@ function renderGraph(){
 function renderLog(){
   const all = Object.entries(data).filter(([,h]) => h > 0);
   const entries = all.sort((a,b) => a[0] < b[0] ? 1 : -1).slice(0, 8);
-  $('activityCount').textContent = `${all.length} ${all.length === 1 ? 'día' : 'días'} registrados`;
+  $('activityCount').textContent = `${all.length} ${all.length === 1 ? 'day' : 'days'}`;
   const el = $('log');
   if (!entries.length){
-    el.innerHTML = '<div class="log-empty">— sin registros todavía —</div>';
+    el.innerHTML = '<div class="log-empty">— no sessions yet —</div>';
     return;
   }
   const max = Math.max(...entries.map(([,h]) => h), 1);
   el.innerHTML = entries.map(([key,h]) => `
     <div class="entry">
       <div class="entry-main">
-        <span class="entry-msg">Registraste <b>${fmtH(h)}</b> de deepwork</span>
+        <span class="entry-msg">Logged <b>${fmtH(h)}</b> of deep work</span>
         <span class="entry-bar"><span style="width:${Math.round(h/max*100)}%"></span></span>
       </div>
       <div class="entry-meta">${longDate(parseYmd(key))} · <span class="hash">${hash7(key)}</span></div>
@@ -427,7 +429,7 @@ function updateCell(dateStr){
   cell.className = 'cell lv' + level(h)
     + (d.getTime() === today.getTime() ? ' today' : '')
     + (editing === dateStr ? ' editing' : '');
-  cell.dataset.tip = h > 0 ? `${fmtH(h)} de deepwork · ${longDate(d)}` : `sin registro · ${longDate(d)}`;
+  cell.dataset.tip = h > 0 ? `${fmtH(h)} of deep work · ${longDate(d)}` : `no record · ${longDate(d)}`;
   cell.setAttribute('aria-label', cell.dataset.tip);
   if (editing === dateStr) $('popHours').textContent = fmtH(h);
 }
@@ -525,7 +527,7 @@ $('sessionControls').addEventListener('click', e => {
   } else if (id === 'finishBtn'){
     finishSession();
   } else if (id === 'discardBtn'){
-    if (confirm('¿Descartar la sesión sin guardarla en hoy?')){
+    if (confirm('Discard this session without saving it to today?')){
       session = null;
       saveSession();
       renderCupSession();
@@ -581,7 +583,7 @@ $('themeBtn').addEventListener('click', () => {
 });
 
 $('resetBtn').addEventListener('click', () => {
-  if (!confirm('¿Borrar todos los registros de deepwork?')) return;
+  if (!confirm('Clear all deep work records?')) return;
   data = {};
   session = null;
   save();
@@ -590,6 +592,49 @@ $('resetBtn').addEventListener('click', () => {
   renderAll();
 });
 
+function spotifyEmbed(url){
+  const m = url.match(/(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?|spotify:)(playlist|album|artist|track|episode|show)[\/:]([A-Za-z0-9]+)/);
+  if (!m) return null;
+  const compact = m[1] === 'track' || m[1] === 'episode';
+  return { src: `https://open.spotify.com/embed/${m[1]}/${m[2]}`, height: compact ? 80 : 152 };
+}
+
+function youtubeEmbed(url){
+  const list = url.match(/[?&]list=([A-Za-z0-9_-]+)/);
+  if (list) return { src: `https://www.youtube.com/embed/videoseries?list=${list[1]}`, height: 152 };
+  const vid = url.match(/(?:youtu\.be\/|[?&]v=)([A-Za-z0-9_-]{6,})/);
+  if (vid) return { src: `https://www.youtube.com/embed/${vid[1]}`, height: 152 };
+  return null;
+}
+
+function musicEmbed(url){
+  return spotifyEmbed(url) || youtubeEmbed(url);
+}
+
+function renderMusic(){
+  const url = localStorage.getItem(MUSIC_KEY) || DEFAULT_MUSIC;
+  const emb = musicEmbed(url);
+  const box = $('musicFrame');
+  if (!emb){ box.innerHTML = ''; return; }
+  box.innerHTML = `<iframe src="${emb.src}" width="100%" height="${emb.height}" frameborder="0" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" title="focus music"></iframe>`;
+}
+
+$('musicEdit').addEventListener('click', () => {
+  const current = localStorage.getItem(MUSIC_KEY) || '';
+  const url = prompt('Paste your Spotify or YouTube playlist link:', current);
+  if (url === null) return;
+  if (url.trim() === ''){
+    localStorage.removeItem(MUSIC_KEY);
+  } else if (musicEmbed(url.trim())){
+    localStorage.setItem(MUSIC_KEY, url.trim());
+  } else {
+    alert('Link not recognized. Use a Spotify (playlist, album, artist, track) or YouTube playlist URL.');
+    return;
+  }
+  renderMusic();
+});
+
 renderAll();
+renderMusic();
 setInterval(tick, 1000);
 tick();

@@ -274,7 +274,7 @@ main{padding-bottom:8px}
 .cup-pct{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
 .cup-sub{font-size:12px;color:var(--fg-muted);white-space:nowrap}
 
-.session{justify-self:center;width:246px;max-width:100%}
+.session{justify-self:center;width:100%;max-width:360px}
 .session-status{
   display:flex;
   align-items:center;
@@ -293,12 +293,12 @@ main{padding-bottom:8px}
   100%{box-shadow:0 0 0 6px rgba(63,185,80,0)}
 }
 .session-timer{
-  font-size:32px;
+  font-size:clamp(38px,4vw,54px);
   font-weight:600;
-  margin-top:10px;
-  line-height:1.15;
+  margin-top:12px;
+  line-height:1.1;
   font-variant-numeric:tabular-nums;
-  letter-spacing:-.02em;
+  letter-spacing:-.03em;
 }
 .session-sub{font-size:12px;color:var(--fg-muted);margin-top:2px}
 .session-controls{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -320,6 +320,42 @@ main{padding-bottom:8px}
 }
 .goal-value{font-weight:600;color:var(--fg)}
 .goal-btns{margin-left:auto;display:flex;gap:6px}
+
+.music{
+  width:100%;
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid var(--border-muted);
+}
+.music-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.music-title{
+  font-size:11px;
+  color:var(--fg-muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.music-edit{
+  background:none;
+  border:none;
+  padding:0;
+  font-family:inherit;
+  font-size:11px;
+  color:var(--accent);
+  cursor:pointer;
+}
+.music-edit:hover{text-decoration:underline}
+.music-frame iframe{
+  display:block;
+  width:100%;
+  border:0;
+  border-radius:6px;
+}
 
 .btn{
   position:relative;
