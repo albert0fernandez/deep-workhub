@@ -191,6 +191,9 @@ function renderCupSession(){
   $('cupPct').textContent = Math.round(f*100) + '%';
 
   const st = s ? s.state : 'idle';
+  document.title = s
+    ? `${fmtClock(Math.max(0, target - elapsed))} · Deep Workhub`
+    : 'Deep Workhub';
   $('statusDot').className = 'status-dot ' + st;
   $('sessionStatus').textContent = STATUS_TEXT[st];
 
